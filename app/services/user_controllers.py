@@ -1,7 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+from app.models.user import User
+from app.schemas.user import UserCreate
 
 
 
-user_router = APIRouter()
+async def create_user(data: UserCreate) -> User:
+    user = await User.create(**data.dict())
+    return user
 
+
+async def get_users():
+    return await User.all()
