@@ -2,7 +2,7 @@
 
 if [ ! -d "/app/migrations" ]; then
   echo "Инициализация миграций..."
-  aerich init -t your_project.db_config.TORTOISE_ORM
+  aerich init -t app.db.TORTOISE_ORM
   aerich migrate
 fi
 
