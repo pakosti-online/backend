@@ -2,7 +2,9 @@
 
 
 TORTOISE_ORM = {
-    "connections": {"default": "sqlite://db.sqlite3"},
+    "connections": {
+        "default": "postgres://postgres:password@localhost:5432/mydatabase"
+    },
     "apps": {
         "models": {
             "models": ["app.models.user", "aerich.models"],

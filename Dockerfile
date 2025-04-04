@@ -1,14 +1,11 @@
-FROM python:3.9-slim
+FROM python:3.11
 
-ENV PYTHONUNBUFFERED 1
-WORKDIR /app/api
-
-COPY requirements.txt .
-
-RUN pip install -r requirements.txt
+WORKDIR /app
 
 COPY . .
 
-EXPOSE 8000
+# Устанавливаем зависимости
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000"]
+# Запускаем FastAPI с миграциями
+CMD ["sh", "-c", "aerich upgrade && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]

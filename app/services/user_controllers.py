@@ -8,5 +8,6 @@ async def create_user(data: UserCreate) -> User:
     return user
 
 
+
 async def get_users():
     return await User.all()
