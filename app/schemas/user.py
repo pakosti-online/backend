@@ -5,7 +5,6 @@ from typing import List
 from enum import Enum
 
 
-
 class UserCreate(BaseModel):
     name: str
     email: str
