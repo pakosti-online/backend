@@ -4,9 +4,7 @@ from tortoise.contrib.fastapi import register_tortoise
 from os import environ
 
 TORTOISE_ORM = {
-    "connections": {
-        "default": environ['DATABASE_URL']
-    },
+    "connections": {"default": environ["DATABASE_URL"]},
     "apps": {
         "models": {
             "models": ["app.models.user", "aerich.models"],
@@ -14,6 +12,7 @@ TORTOISE_ORM = {
         },
     },
 }
+
 
 def init_db(app: FastAPI) -> None:
     Tortoise.init_models(["app.models.user"], "models")

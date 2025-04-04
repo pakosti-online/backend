@@ -4,6 +4,7 @@ import app.controllers.user as user_controller
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+
 @router.post("", response_model=UserOut)
 async def create_user(user: UserCreate):
     """Создание пользователя"""
@@ -14,4 +15,3 @@ async def create_user(user: UserCreate):
 async def list_users():
     """Получение всех пользователей"""
     return await user_controller.get()
-
