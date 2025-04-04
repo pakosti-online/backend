@@ -2,10 +2,15 @@ FROM python:3.11
 
 WORKDIR /app
 
-COPY . .
+COPY ./app/* ./
+COPY ./requirements.txt ./requirements.txt
+RUN pip install -r requirements.txt
 
-# Устанавливаем зависимости
-RUN pip install --no-cache-dir -r requirements.txt
+COPY ./aerich.ini ./aerich.ini
+COPY ./pyproject.toml ./pyproject.toml
 
-# Запускаем FastAPI с миграциями
-CMD ["sh", "-c", "aerich upgrade && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
+COPY ./entrypoint.sh ./entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

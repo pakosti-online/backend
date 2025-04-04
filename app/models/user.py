@@ -1,6 +1,6 @@
 from passlib.hash import bcrypt
 from tortoise import fields
-from tortoise.models import Model\
+from tortoise.models import Model
 
 
 class UserModel(Model):    
