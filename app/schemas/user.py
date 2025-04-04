@@ -13,6 +13,7 @@ class CreateUserDto(BaseModel):
 
 
 class UserDto(BaseModel):
+    id: int
     first_name: str
     last_name: str
     patronymic: Optional[str]

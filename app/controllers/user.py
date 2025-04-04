@@ -23,6 +23,7 @@ async def create_user(dto: CreateUserDto) -> UserWithEmailDto:
     )
 
     return UserWithEmailDto(
+        id=user.id,
         email=user.email,
         first_name=user.first_name,
         last_name=user.last_name,
@@ -34,6 +35,7 @@ async def get_users() -> List[UserDto]:
     users = await UserModel.all()
     return [
         UserDto(
+            id=user.id,
             first_name=user.first_name,
             last_name=user.last_name,
             patronymic=user.patronymic or None,
@@ -54,6 +56,7 @@ async def get_user_by_id(user_id: int) -> UserDto:
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
     return UserDto(
+        id=user.id,
         first_name=user.first_name,
         last_name=user.last_name,
         patronymic=user.patronymic or None,
@@ -65,6 +68,7 @@ async def get_user_with_email(user_id: int) -> UserWithEmailDto:
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
     return UserWithEmailDto(
+        id=user.id,
         email=user.email,
         first_name=user.first_name,
         last_name=user.last_name,
