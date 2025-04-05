@@ -12,6 +12,8 @@ class UserModel(Model):
     last_name = fields.CharField(max_length=30)
     patronymic = fields.CharField(max_length=30)
 
+    balance = fields.IntField()
+
     def verify_password(self, password):
         return bcrypt.verify(password, self.password_hash)
 
