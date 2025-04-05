@@ -1,13 +1,12 @@
-from fastapi import HTTPException
-
 from app.models.transaction import TransactionModel, TransactionCategoryModel
+import app.controllers.categories as category_controller
+import app.controllers.websocket.events as events
 from app.models.user import UserModel
+from fastapi import HTTPException
 from app.schemas.transaction import (
     CreateTransactionDto,
     TransactionDto,
 )
-from app.controllers.categories import get_category
-import app.controllers.websocket.events as events
 
 
 async def create(data: CreateTransactionDto, user: UserModel) -> TransactionDto:
@@ -17,7 +16,7 @@ async def create(data: CreateTransactionDto, user: UserModel) -> TransactionDto:
             status_code=403, detail="Принимаются только delta > 0!"
         )
 
-    category = await get_category(data.product_name)
+    category = await category_controller.get_by_product_name(data.product_name)
     if not category:
         events.event_sending_mes(
             "Не удалось получить данные о категории!", user

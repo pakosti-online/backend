@@ -8,7 +8,7 @@ PREDICTOR_CATEGORIZER_URL = environ.get(
 )
 
 
-async def get_category(product_name: str):
+async def get_by_product_name(product_name: str):
     async with httpx.AsyncClient() as client:
         response = await client.post(
             PREDICTOR_CATEGORIZER_URL, json={"word": product_name}
