@@ -20,13 +20,7 @@ def create_token(
 ) -> str:
     exp = datetime.now() + lifetime
     data = {
-        "user": VerboseUserDto(
-            id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            patronymic=user.patronymic,
-            email=user.email,
-        ).model_dump(),
+        "user": VerboseUserDto.new(user).model_dump(),
         "exp": exp,
         "type": token_type,
     }
