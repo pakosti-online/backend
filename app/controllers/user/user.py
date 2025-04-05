@@ -1,7 +1,6 @@
-from app.models.user import UserModel
+from .auth import create_refresh_token, create_access_token, verify_token
 from app.schemas.user import CreateUserDto, UserWithEmailDto, UserDto
-from typing import List
-
+from app.models.user import UserModel
 from fastapi import HTTPException
 from passlib.hash import bcrypt
 
@@ -22,24 +21,12 @@ async def create_user(dto: CreateUserDto) -> UserWithEmailDto:
         patronymic=dto.patronymic or "",
     )
 
-    return UserWithEmailDto(
-        email=user.email,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        patronymic=user.patronymic or None,
-    )
+    return UserWithEmailDto.new(user)
 
 
-async def get_users() -> List[UserDto]:
+async def get_users() -> list[UserDto]:
     users = await UserModel.all()
-    return [
-        UserDto(
-            first_name=user.first_name,
-            last_name=user.last_name,
-            patronymic=user.patronymic or None,
-        )
-        for user in users
-    ]
+    return [UserDto.new(user) for user in users]
 
 
 async def delete_user(user_id: int) -> None:
@@ -53,20 +40,31 @@ async def get_user_by_id(user_id: int) -> UserDto:
     user = await UserModel.get_or_none(id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    return UserDto(
-        first_name=user.first_name,
-        last_name=user.last_name,
-        patronymic=user.patronymic or None,
-    )
+    return UserDto.new(user)
 
 
 async def get_user_with_email(user_id: int) -> UserWithEmailDto:
     user = await UserModel.get_or_none(id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    return UserWithEmailDto(
-        email=user.email,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        patronymic=user.patronymic or None,
-    )
+    return UserWithEmailDto.new(user)
+
+
+async def login(email: str, password: str):
+    user = await UserModel.get_or_none(email=email)
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    elif not user.verify_password(password):
+        raise HTTPException(status_code=401, detail="Неверный логин или пароль")
+
+    return user, create_access_token(user), create_refresh_token(user)
+
+
+async def refresh(refresh_token: str):
+    payload = verify_token(refresh_token, "refresh")
+    user_data: dict = payload.get("user")
+    user = await UserModel.get_or_none(user_data.get("email"))
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    return create_access_token(user)

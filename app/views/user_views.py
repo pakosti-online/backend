@@ -1,18 +1,44 @@
-from fastapi import APIRouter, Path
-from typing import List
-from app.schemas.user import CreateUserDto, UserDto, UserWithEmailDto
+from app.schemas.user import (
+    CreateUserDto,
+    UserDto,
+    UserWithEmailDto,
+    UserTokensDto,
+)
+
+from fastapi.security import OAuth2PasswordRequestForm
 import app.controllers.user as user_controller
+from fastapi import APIRouter, Path, Depends
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.post("", response_model=UserWithEmailDto)
-async def create_user(user: CreateUserDto):
-    """Создание пользователя"""
+async def register(user: CreateUserDto):
+    """Регистрация нового пользователя"""
     return await user_controller.create_user(user)
 
 
-@router.get("", response_model=List[UserDto])
+@router.post("/login", response_model=UserTokensDto)
+async def login(input: OAuth2PasswordRequestForm = Depends()):
+    """Вход пользователя. Генерирует Access/Refresh токены"""
+    user, access, refresh = await user_controller.login(
+        input.username, input.password
+    )
+
+    return UserTokensDto(
+        user_data=UserWithEmailDto.new(user),
+        access_token=access,
+        refresh_token=refresh,
+    )
+
+
+@router.post("/refresh", response_model=str)
+async def refresh(token: str = Depends(user_controller.auth.OAUTH2_SCHEME)):
+    """Обновление Access-токена. В заголовке Authorization необходимо указать Refresh-токен"""
+    return await user_controller.refresh(token)
+
+
+@router.get("", response_model=list[UserDto])
 async def list_users():
     """Получение всех пользователей"""
     return await user_controller.get_users()
@@ -31,6 +57,8 @@ async def get_user(user_id: int = Path(..., gt=0)):
 
 
 @router.get("/{user_id}/full", response_model=UserWithEmailDto)
-async def get_user_with_email(user_id: int = Path(..., gt=0)):
+async def get_user_with_email(
+    user_id: int = Path(..., gt=0), user=Depends(user_controller.auth.get_user)
+):
     """Получение пользователя по ID (с email)"""
     return await user_controller.get_user_with_email(user_id)
