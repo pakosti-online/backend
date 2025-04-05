@@ -3,6 +3,9 @@ from app.schemas.user import CreateUserDto, VerboseUserDto, UserDto
 from app.models.user import UserModel
 from fastapi import HTTPException
 from passlib.hash import bcrypt
+from os import environ
+
+DEFAULT_BALANCE = int(environ.get("DEFAULT_BALANCE", '10000'))
 
 
 async def create_user(dto: CreateUserDto) -> VerboseUserDto:
@@ -19,6 +22,7 @@ async def create_user(dto: CreateUserDto) -> VerboseUserDto:
         first_name=dto.first_name,
         last_name=dto.last_name,
         patronymic=dto.patronymic or "",
+        balance=DEFAULT_BALANCE
     )
 
     return VerboseUserDto.new(user)
