@@ -7,17 +7,18 @@ from app.init_categories import create_categories
 
 def create_application():
     app = FastAPI(title="Pakosti Online", docs_url="/swagger")
-    app.include_router(api_router)
 
     # we do real PAKOSTI here
     app.add_middleware(
         CORSMiddleware,
         allow_credentials=True,
+        allow_origins=["*"],
         allow_methods=["*"],
         allow_headers=["*"],
     )
 
     init_db(app)
+    app.include_router(api_router)
 
     return app
 
