@@ -60,7 +60,7 @@ async def get_user(token: str = Depends(OAUTH2_SCHEME)):
     try:
         payload = verify_token(token, "access")
         user_data = payload.get("user")
-        return UserModel.get(id=user_data.get("id"))
+        return await UserModel.get(id=user_data.get("id"))
     except DoesNotExist:
         raise HTTPException(
             status_code=401, detail="Пользователя не существует!"
