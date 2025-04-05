@@ -7,6 +7,7 @@ from app.schemas.transaction import (
     TransactionUserIdDto,
     TransactionOutDto,
     TransactionChangeByIdDto,
+    TransactionIdDto,
 )
 
 
@@ -88,3 +89,12 @@ async def get_all() -> list[TransactionOutDto]:
     transactions = await TransactionModel.all()
 
     return [TransactionOutDto.new(transaction) for transaction in transactions]
+
+
+async def delete_transaction(data: TransactionIdDto) -> None:
+    transaction = await TransactionModel.get_or_none(id=data.id)
+
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Транзакция не найдена")
+
+    await transaction.delete()

@@ -28,6 +28,10 @@ class TransactionUserIdDto(BaseModel):
     user_id: int
 
 
+class TransactionIdDto(BaseModel):
+    id: int
+
+
 class TransactionOutDto(BaseModel):
     id: int
     name: str
