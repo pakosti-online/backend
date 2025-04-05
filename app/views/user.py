@@ -3,6 +3,7 @@ from app.schemas.user import (
     UserDto,
     VerboseUserDto,
     UserTokensDto,
+    UserEditPublicDto,
 )
 
 from fastapi.security import OAuth2PasswordRequestForm
@@ -58,5 +59,14 @@ async def get_user(user_id: int = Path(..., gt=0)):
 
 @router.get("/me")
 async def get_user_verbose(user=Depends(user_controller.auth.get_user)):
-    """Возвращает подробную информацию о текущем ауентифицированном пользователе"""
+    """Возвращает подробную информацию о текущем аутентифицированном пользователе"""
     return await user_controller.get_user_verbose(user.id)
+
+
+@router.patch("/edit", response_model=VerboseUserDto)
+async def edit_public_info(
+    update_info: UserEditPublicDto, user=Depends(user_controller.auth.get_user)
+):
+    """Позволяет изменять публичные данные о пользователе"""
+    await user_controller.update_public_info(user, update_info)
+    return user

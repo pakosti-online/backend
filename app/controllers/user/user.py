@@ -1,11 +1,16 @@
 from .auth import create_refresh_token, create_access_token, verify_token
-from app.schemas.user import CreateUserDto, VerboseUserDto, UserDto
+from app.schemas.user import (
+    CreateUserDto,
+    VerboseUserDto,
+    UserDto,
+    UserEditPublicDto,
+)
 from app.models.user import UserModel
 from fastapi import HTTPException
 from passlib.hash import bcrypt
 from os import environ
 
-DEFAULT_BALANCE = int(environ.get("DEFAULT_BALANCE", '10000'))
+DEFAULT_BALANCE = int(environ.get("DEFAULT_BALANCE", "10000"))
 
 
 async def create_user(dto: CreateUserDto) -> VerboseUserDto:
@@ -22,10 +27,23 @@ async def create_user(dto: CreateUserDto) -> VerboseUserDto:
         first_name=dto.first_name,
         last_name=dto.last_name,
         patronymic=dto.patronymic or "",
-        balance=DEFAULT_BALANCE
+        balance=DEFAULT_BALANCE,
     )
 
     return VerboseUserDto.new(user)
+
+
+async def update_public_info(user: UserModel, update_info: UserEditPublicDto):
+    if update_info.first_name:
+        user.first_name = update_info.first_name
+
+    if update_info.last_name:
+        user.last_name = update_info.last_name
+
+    if update_info.patronymic:
+        user.patronymic = update_info.patronymic
+
+    await user.save()
 
 
 async def get_users() -> list[UserDto]:

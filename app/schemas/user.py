@@ -49,3 +49,9 @@ class UserTokensDto(BaseModel):
     user_data: VerboseUserDto
     access_token: str
     refresh_token: str
+
+
+class UserEditPublicDto(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    patronymic: Optional[str] = None
