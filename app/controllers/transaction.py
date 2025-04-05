@@ -37,7 +37,6 @@ async def update_transaction(
     data: TransactionChangeByIdDto,
 ) -> TransactionOutDto:
     """Изменение полей у транзакции, передаются id транзакции и словарь: ключ-значения"""
-    # Находим транзакцию по ID
     transaction = await TransactionModel.get_or_none(id=data.id)
 
     if not transaction:
@@ -49,15 +48,14 @@ async def update_transaction(
         if field != "id"
     }
 
-    # Проверяем, что все поля в updates существуют в модели
+    # Проверка на существование полей в модельке
     for field in data.updates.keys():
         if field not in valid_fields:
             raise HTTPException(
                 status_code=404,
-                detail=f"Invalid field '{field}'. Valid fields are: {valid_fields}",
+                detail=f"Неверное поле: '{field}'. Допустимые поля: {valid_fields}",
             )
 
-    # Обновляем поля
     for field, value in data.updates.items():
         setattr(transaction, field, value)
 

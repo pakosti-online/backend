@@ -23,7 +23,7 @@ async def list_transactions():
     return await transaction_controller.get_all()
 
 
-@router.post("-get-by-userId", response_model=list[TransactionOutDto])
+@router.post("/{data.user_id}", response_model=list[TransactionOutDto])
 async def get_transactions_with_user_id(data: TransactionUserIdDto):
     """Получение транзакций относительно id пользователя"""
     return await transaction_controller.get_transactions_for_user_id(data)
@@ -37,4 +37,5 @@ async def change_transaction_data(data: TransactionChangeByIdDto):
 
 @router.delete("", status_code=204)
 async def delete_transaction(data: TransactionIdDto):
+    """Удаление по id транзакции"""
     await transaction_controller.delete_transaction(data)
