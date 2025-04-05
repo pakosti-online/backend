@@ -2,6 +2,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.views import api_router
 from fastapi import FastAPI
 from app.db import init_db
+from app.init_categories import create_categories
 
 
 def create_application():
@@ -22,3 +23,8 @@ def create_application():
 
 
 app = create_application()
+
+
+@app.on_event("startup")
+async def startup_event():
+    await create_categories()

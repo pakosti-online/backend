@@ -12,6 +12,6 @@ async def get_all_categories() -> list[TransactionCategoryOutDto]:
     transaction_categories = await TransactionCategoryModel.all()
 
     return [
-        TransactionCategoryOutDto(transaction_category)
+        TransactionCategoryOutDto.new(transaction_category)
         for transaction_category in transaction_categories
     ]
