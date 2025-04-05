@@ -12,7 +12,7 @@ class UserModel(Model):
     last_name = fields.CharField(max_length=30)
     patronymic = fields.CharField(max_length=30)
 
-    balance = fields.IntField()
+    balance = fields.DecimalField(max_digits=20, decimal_places=2, default=0.00)
 
     def verify_password(self, password):
         return bcrypt.verify(password, self.password_hash)

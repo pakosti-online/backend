@@ -13,7 +13,7 @@ async def upgrade(db: BaseDBAsyncClient) -> str:
     "delta" DECIMAL(20,2) NOT NULL DEFAULT 0,
     "user_id" INT NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE
 );
-        ALTER TABLE "users" ADD "balance" INT NOT NULL;"""
+        ALTER TABLE "users" ADD "balance" DECIMAL(20,2) NOT NULL DEFAULT 0;"""
 
 
 async def downgrade(db: BaseDBAsyncClient) -> str:
