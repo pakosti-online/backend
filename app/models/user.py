@@ -1,6 +1,6 @@
+from tortoise.models import Model
 from passlib.hash import bcrypt
 from tortoise import fields
-from tortoise.models import Model
 
 
 class UserModel(Model):
@@ -13,7 +13,7 @@ class UserModel(Model):
     patronymic = fields.CharField(max_length=30)
 
     def verify_password(self, password):
-        return bcrypt.verify(password, self.password)
+        return bcrypt.verify(password, self.password_hash)
 
     class Meta:
         table: str = "users"

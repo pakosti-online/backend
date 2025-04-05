@@ -1,5 +1,6 @@
 from pydantic import BaseModel, StringConstraints
 from typing import Optional, Annotated
+from app.models.user import UserModel
 
 
 class CreateUserDto(BaseModel):
@@ -18,6 +19,31 @@ class UserDto(BaseModel):
     last_name: str
     patronymic: Optional[str]
 
+    @staticmethod
+    def new(user: UserModel):
+        return UserDto(
+            id=user.id,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            patronymic=user.patronymic,
+        )
+
 
 class UserWithEmailDto(UserDto):
     email: str
+
+    @staticmethod
+    def new(user: UserModel):
+        return UserWithEmailDto(
+            id=user.id,
+            email=user.email,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            patronymic=user.patronymic,
+        )
+
+
+class UserTokensDto(BaseModel):
+    user_data: UserWithEmailDto
+    access_token: str
+    refresh_token: str
