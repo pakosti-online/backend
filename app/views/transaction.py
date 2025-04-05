@@ -47,3 +47,10 @@ async def get_recommendations(user=Depends(user_controller.auth.get_user)):
         user.id
     )
     return await ml_controller.get_recommendations(transactions)
+
+@router.get("/forecast")
+async def get_recommendations(days: int, user=Depends(user_controller.auth.get_user)):
+    transactions = await transaction_controller.get_transactions_by_user(
+        user.id
+    )
+    return await ml_controller.get_forecast(transactions, days)

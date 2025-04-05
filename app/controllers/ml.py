@@ -12,6 +12,9 @@ PREDICTOR_RECOMMENDATION_URL = environ.get(
     "EXTERNAL_PREDICTOR_RECOMMENDATION_URL", "http://localhost:3000/"
 )
 
+PREDICTOR_FORECAST_URL = environ.get(
+    "EXTERNAL_PREDICTOR_FORECAST_URL", "http://localhost:3000/"
+)
 
 async def get_category_by_product(product_name: str):
     async with httpx.AsyncClient() as client:
@@ -42,3 +45,20 @@ async def get_recommendations(transactions: list[TransactionDto]):
                 detail="Произошла ошибка при попытке получить рекомендации!",
             )
         return json.loads(response.text)
+
+async def get_forecast(transactions: list[TransactionDto], day_predict: int):
+    loadable_transactions = [
+        transaction.model_dump() for transaction in transactions
+    ]
+    data = {"data": loadable_transactions, "days": day_predict}
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            PREDICTOR_RECOMMENDATION_URL, json=data
+        )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=403,
+                detail="Произошла ошибка при попытке получить предсказание баланса!",
+            )
+        return int(response.text)
