@@ -1,6 +1,7 @@
 from app.views import api_router
 from fastapi import FastAPI
 from app.db import init_db
+from app.init_categories import create_categories
 
 
 def create_application():
@@ -13,3 +14,5 @@ def create_application():
 
 
 app = create_application()
+
+create_categories()
