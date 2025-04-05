@@ -15,3 +15,7 @@ async def event_sending_notif(
     user: UserModel,
 ) -> None:
     manager.send_notification(notification, user.id)
+
+
+async def broadcast(message: str) -> None:
+    manager.broadcast(message)

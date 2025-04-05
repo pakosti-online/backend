@@ -44,7 +44,7 @@ async def create(data: CreateTransactionDto, user: UserModel) -> TransactionDto:
         user_id=user.id,
         category_id=category.id,
     )
-
+    events.event_sending_mes("Успешно создана транзакция!", user)
     return TransactionDto.new(transaction, category.name)
 
 
@@ -54,11 +54,15 @@ async def edit_category(
     transaction = await TransactionModel.get_or_none(id=transaction_id)
 
     if not transaction:
+        events.event_sending_mes("Несуществующая транзакция!", user)
         raise HTTPException(
             status_code=404, detail="Транзакции с данным ID не существует!"
         )
 
     if transaction.user_id != user.id:
+        events.event_sending_mes(
+            "Вы не имеете права взаимодействовать с данной транзакцией!", user
+        )
         raise HTTPException(
             status_code=403,
             detail="Вы не имеете права взаимодействовать с данной транзакцией!",
@@ -69,11 +73,17 @@ async def edit_category(
     )
 
     if current_category.is_deposit:
+        events.event_sending_mes(
+            "Вы не можете менять категорию у приходящей транзакции!", user
+        )
         raise HTTPException(
             status_code=403,
             detail="Вы не можете менять категорию у приходящей транзакции!",
         )
     elif new_category.is_deposit:
+        events.event_sending_mes(
+            "Вы не можете менять категорию на приходящую транзакцию!", user
+        )
         raise HTTPException(
             status_code=403,
             detail="Вы не можете менять категорию на приходящую!",
@@ -84,11 +94,13 @@ async def edit_category(
     )
 
     if not new_category:
+        events.event_sending_mes("Такой категории не существует!", user)
         raise HTTPException(
             status_code=404, detail="Данной категории не существует!"
         )
 
     transaction.category_id = new_category.id
+    events.event_sending_mes("Успешно сохранена транзакция!", user)
     await transaction.save()
 
 
