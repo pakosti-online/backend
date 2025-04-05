@@ -2,7 +2,7 @@ from pydantic import BaseModel, StringConstraints, condecimal
 from typing import Annotated, Optional, Dict, Union
 from datetime import datetime
 
-from app.models.transaction import TransactionModel
+from app.models.transaction import TransactionModel, TransactionCategoryModel
 
 
 class CreateTransactionDto(BaseModel):
@@ -36,4 +36,18 @@ class TransactionDto(BaseModel):
             balance=data.balance,
             delta=data.delta,
             user_id=data.user_id,
+        )
+
+
+class TransactionCategoryOutDto(BaseModel):
+    id: int
+    name: Annotated[str, StringConstraints(max_length=100)]
+    is_deposit: bool
+
+    @staticmethod
+    def new(data: TransactionCategoryModel):
+        return TransactionCategoryOutDto(
+            id=data.id,
+            name=data.name,
+            is_deposit=data.is_deposit,
         )

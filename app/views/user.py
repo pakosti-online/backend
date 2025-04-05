@@ -90,5 +90,5 @@ async def delete_avatar(user=Depends(user_controller.auth.get_user)):
 async def create_url(user=Depends(user_controller.auth.get_user)):
     """Создание ссылки на аватарку по нынешнему id пользователю (опционально)"""
     return await user_avatar_controller.create_url_by_user_id(
-        UserAvatarInDto(id=user.id)
+        UserAvatarInDto(id=user.avatar_id)
     )

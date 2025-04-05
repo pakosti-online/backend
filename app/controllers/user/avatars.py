@@ -106,11 +106,7 @@ async def delete_avatar(data: UserAvatarInDto) -> None:
 
 
 async def create_url_by_user_id(data: UserInDto) -> FileResponse:
-    user = await UserModel.get_or_none(id=data.id)
-    if not avatar:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
-
-    avatar = await AvatarModel.get_or_none(id=user.id)
+    avatar = await AvatarModel.get_or_none(id=data.id)
     if not avatar:
         raise HTTPException(status_code=404, detail="Аватарка не найдена")
 
