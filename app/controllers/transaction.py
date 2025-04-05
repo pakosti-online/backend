@@ -3,24 +3,28 @@ from fastapi import HTTPException
 from app.models.transaction import TransactionModel
 from app.models.user import UserModel
 from app.schemas.transaction import (
-    TransactionCreate,
-    TransactionId,
-    TransactionOut,
-    TransactionChangeById,
+    TransactionCreateDto,
+    TransactionUserIdDto,
+    TransactionOutDto,
+    TransactionChangeByIdDto,
 )
 
 
-async def create(data: TransactionCreate) -> TransactionModel:
+async def create(data: TransactionCreateDto) -> TransactionOutDto:
     """Создание транзакции"""
-    user = await UserModel.get_or_none(id=data.id)
+    user = await UserModel.get_or_none(id=data.user_id)
     if not user:
         raise HTTPException(status_code=404, detail=f"Пользователь не найден")
 
     try:
         transaction = await TransactionModel.create(
-            name=data.name, category=data.category, user_id=data.user_id
+            name=data.name,
+            category=data.category,
+            user_id=data.user_id,
+            balance=data.balance,
+            delta=data.delta,
         )
-        return transaction
+        return TransactionOutDto.new(transaction)
 
     except Exception:
         raise HTTPException(
@@ -28,21 +32,42 @@ async def create(data: TransactionCreate) -> TransactionModel:
         )
 
 
-# недоделано !!!
-async def change_tranzaction_by_id(
-    data: TransactionChangeById,
-) -> TransactionModel:
-    """Изменение параметров относительно id транзакции"""
-    transaction_old = await TransactionModel.get_or_none(id=data.id)
-    if not transaction_old:
+async def update_transaction(
+    data: TransactionChangeByIdDto,
+) -> TransactionOutDto:
+    """Изменение полей у транзакции, передаются id транзакции и словарь: ключ-значения"""
+    # Находим транзакцию по ID
+    transaction = await TransactionModel.get_or_none(id=data.id)
+
+    if not transaction:
         raise HTTPException(status_code=404, detail="Транзакция не найдена")
 
-    return
+    valid_fields = {
+        field
+        for field in TransactionModel._meta.fields_map.keys()
+        if field != "id"
+    }
+
+    # Проверяем, что все поля в updates существуют в модели
+    for field in data.updates.keys():
+        if field not in valid_fields:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Invalid field '{field}'. Valid fields are: {valid_fields}",
+            )
+
+    # Обновляем поля
+    for field, value in data.updates.items():
+        setattr(transaction, field, value)
+
+    await transaction.save()
+
+    return TransactionOutDto.new(transaction)
 
 
 async def get_transactions_for_user_id(
-    data: TransactionId,
-) -> list[TransactionOut]:
+    data: TransactionUserIdDto,
+) -> list[TransactionOutDto]:
     """Получение транзакций относительно id пользователя"""
     user = await UserModel.get_or_none(id=data.id)
     if not user:
@@ -55,31 +80,11 @@ async def get_transactions_for_user_id(
             detail=f"Нет транзакций с закрепленной id пользователем: {data.id}",
         )
 
-    return [
-        TransactionOut(
-            id=transaction.id,
-            name=transaction.name,
-            date_created=transaction.date_created,
-            date_updated=transaction.date_updated,
-            category=transaction.category,
-            user_id=transaction.user_id,
-        )
-        for transaction in transactions
-    ]
+    return [TransactionOutDto.new(transaction) for transaction in transactions]
 
 
-async def get_all() -> list[TransactionOut]:
+async def get_all() -> list[TransactionOutDto]:
     """Получение всех транзакций"""
     transactions = await TransactionModel.all()
 
-    return [
-        TransactionOut(
-            id=transaction.id,
-            name=transaction.name,
-            date_created=transaction.date_created,
-            date_updated=transaction.date_updated,
-            category=transaction.category,
-            user_id=transaction.user_id,
-        )
-        for transaction in transactions
-    ]
+    return [TransactionOutDto.new(transaction) for transaction in transactions]
