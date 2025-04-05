@@ -6,6 +6,10 @@ class UserAvatarInDto(BaseModel):
     id: int
 
 
+class UserInDto(BaseModel):
+    id: int
+
+
 class UserAvatarOutDto(BaseModel):
     id: int
     file_path: str

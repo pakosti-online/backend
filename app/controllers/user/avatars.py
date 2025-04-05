@@ -8,7 +8,7 @@ import io
 from .utils import validate_image_file
 from app.models.user import UserModel, AvatarModel
 from .auth import get_user
-from app.schemas.avatars import UserAvatarOutDto, UserAvatarInDto
+from app.schemas.avatars import UserAvatarOutDto, UserAvatarInDto, UserInDto
 
 
 async def create_avatar_for_user(
@@ -105,8 +105,12 @@ async def delete_avatar(data: UserAvatarInDto) -> None:
     return
 
 
-async def create_url_for_file(data: UserAvatarInDto) -> FileResponse:
-    avatar = await AvatarModel.get_or_none(id=data.id)
+async def create_url_by_user_id(data: UserInDto) -> FileResponse:
+    user = await UserModel.get_or_none(id=data.id)
+    if not avatar:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    avatar = await AvatarModel.get_or_none(id=user.id)
     if not avatar:
         raise HTTPException(status_code=404, detail="Аватарка не найдена")
 

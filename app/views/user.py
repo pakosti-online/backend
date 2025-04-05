@@ -12,7 +12,7 @@ import app.controllers.user as user_controller
 import app.controllers.user.avatars as user_avatar_controller
 from fastapi import APIRouter, Path, Depends, UploadFile
 from fastapi.responses import FileResponse
-
+from app.models.user import UserModel
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -79,14 +79,16 @@ async def create_avatar_for_user(
 
 
 @router.delete("/avatar", status_code=204)
-async def delete_avatar(id: int):
-    """Удаление аватарки"""
-    await user_avatar_controller.delete_avatar(UserAvatarInDto(id=id))
+async def delete_avatar(user=Depends(user_controller.auth.get_user)):
+    """Удаление аватарки у текущего пользователя"""
+    await user_avatar_controller.delete_avatar(
+        UserAvatarInDto(id=user.avatar_id)
+    )
 
 
-@router.get("/avatar-url/{id}", response_class=FileResponse)
-async def create_url(id: int):
-    """Создание ссылки на аватарку через эндпоинт (опционально)"""
-    return await user_avatar_controller.create_url_for_file(
-        UserAvatarInDto(id=id)
+@router.get("/avatar-url/{user.id}", response_class=FileResponse)
+async def create_url(user=Depends(user_controller.auth.get_user)):
+    """Создание ссылки на аватарку по нынешнему id пользователю (опционально)"""
+    return await user_avatar_controller.create_url_by_user_id(
+        UserAvatarInDto(id=user.id)
     )
