@@ -25,3 +25,14 @@ class TransactionModel(Model):
 
     class Meta:
         table: str = "transactions"
+
+class TransactionModelEdit(Model):
+    id = fields.IntField(pk=True)
+    product_name = fields.CharField(max_length=100)
+    user = fields.ForeignKeyField("models.UserModel", related_name="user1")
+    category = fields.ForeignKeyField(
+        "models.TransactionCategoryModel", related_name="transactions_edits"
+    )
+    class Meta:
+        table: str = "transaction_edits"
+        

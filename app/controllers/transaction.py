@@ -1,4 +1,4 @@
-from app.models.transaction import TransactionModel, TransactionCategoryModel
+from app.models.transaction import TransactionModel, TransactionCategoryModel, TransactionModelEdit
 import app.controllers.categories as category_controller
 import app.controllers.websocket.events as events
 from app.models.user import UserModel
@@ -88,6 +88,12 @@ async def edit_category(
             status_code=404, detail="Данной категории не существует!"
         )
 
+    await TransactionModelEdit.create(
+        product_name=transaction.product_name,
+        user_id=user.id,
+        category_id=new_category.id,
+    )
+    
     transaction.category_id = new_category.id
     await transaction.save()
 
