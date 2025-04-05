@@ -31,15 +31,17 @@ class UserDto(BaseModel):
 
 class VerboseUserDto(UserDto):
     email: str
+    balance: int
 
     @staticmethod
     def new(user: UserModel):
         return VerboseUserDto(
             id=user.id,
-            email=user.email,
             first_name=user.first_name,
             last_name=user.last_name,
             patronymic=user.patronymic,
+            email=user.email,
+            balance=user.balance,
         )
 
 

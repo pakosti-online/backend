@@ -43,7 +43,7 @@ async def get_user_by_id(user_id: int) -> UserDto:
     return UserDto.new(user)
 
 
-async def get_user_with_email(user_id: int) -> VerboseUserDto:
+async def get_user_verbose(user_id: int) -> VerboseUserDto:
     user = await UserModel.get_or_none(id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
