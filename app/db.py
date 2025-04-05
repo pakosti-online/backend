@@ -7,7 +7,7 @@ TORTOISE_ORM = {
     "connections": {"default": environ["DATABASE_URL"]},
     "apps": {
         "models": {
-            "models": ["app.models.user", "app.models.transaction", "aerich.models"],
+            "models": ["app.models", "app.models", "aerich.models"],
             "default_connection": "default",
         },
     },
@@ -15,11 +15,11 @@ TORTOISE_ORM = {
 
 
 def init_db(app: FastAPI) -> None:
-    Tortoise.init_models(["app.models.user", "app.models.transaction"], "models")
+    Tortoise.init_models(["app.models", "app.models"], "models")
     register_tortoise(
         app,
         config=TORTOISE_ORM,
-        modules={"models": ["app.models.user", "app.models.transaction"]},
+        modules={"models": ["app.models", "app.models"]},
         generate_schemas=True,
         add_exception_handlers=True,
     )
