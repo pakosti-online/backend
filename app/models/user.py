@@ -3,6 +3,16 @@ from passlib.hash import bcrypt
 from tortoise import fields
 
 
+class Avatar(Model):
+    id = fields.IntField(pk=True)
+    file_path = fields.CharField(
+        max_length=255, null=True, default=None
+    )  # Путь к файлу или URL
+
+    class Meta:
+        table: str = "avatars"
+
+
 class UserModel(Model):
     id = fields.IntField(pk=True)
     email = fields.CharField(null=False, max_length=60, unique=True)
@@ -13,6 +23,13 @@ class UserModel(Model):
     patronymic = fields.CharField(max_length=30)
 
     balance = fields.DecimalField(max_digits=20, decimal_places=2, default=0.00)
+
+    avatar = fields.ForeignKeyField(
+        "models.Avatar",
+        related_name="user_avatar",
+        null=True,
+        on_delete=fields.SET_NULL,
+    )
 
     def verify_password(self, password):
         return bcrypt.verify(password, self.password_hash)

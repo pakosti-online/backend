@@ -22,6 +22,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - photoes:/backend/uploads/photoes
     command: >
       sh -c "aerich upgrade && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
@@ -39,3 +40,4 @@ services:
 
 volumes:
   postgres_data:
+  photoes:

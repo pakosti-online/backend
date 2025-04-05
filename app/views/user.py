@@ -5,10 +5,12 @@ from app.schemas.user import (
     UserTokensDto,
     UserEditPublicDto,
 )
+from app.schemas.avatars import UserAvatarOutDto, UserAvatarInDto
 
 from fastapi.security import OAuth2PasswordRequestForm
 import app.controllers.user as user_controller
-from fastapi import APIRouter, Path, Depends
+from fastapi import APIRouter, Path, Depends, UploadFile
+
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -64,3 +66,11 @@ async def edit_public_info(
     """Позволяет изменять публичные данные о пользователе"""
     await user_controller.update_public_info(user, update_info)
     return user
+
+
+@router.post("/avatar", response_model=UserAvatarOutDto)
+async def create_avatar_for_user(
+    file: UploadFile, user=Depends(user_controller.auth.get_user)
+):
+    """Создание аватарки для пользователя, если такая есть то предыдущая удаляется"""
+    return await user_controller.avatars.create_avatar_for_user(file, user)
