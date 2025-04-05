@@ -3,96 +3,41 @@ from fastapi import HTTPException
 from app.models.transaction import TransactionModel
 from app.models.user import UserModel
 from app.schemas.transaction import (
-    TransactionCreateDto,
-    TransactionUserIdDto,
-    TransactionOutDto,
-    TransactionChangeByIdDto,
-    TransactionIdDto,
+    CreateTransactionDto,
+    TransactionDto,
 )
+from app.controllers.categories import get_category
 
 
-async def create(data: TransactionCreateDto) -> TransactionOutDto:
-    """Создание транзакции"""
-    user = await UserModel.get_or_none(id=data.user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail=f"Пользователь не найден")
-
-    try:
-        transaction = await TransactionModel.create(
-            name=data.name,
-            category=data.category,
-            user_id=data.user_id,
-            balance=data.balance,
-            delta=data.delta,
-        )
-        return TransactionOutDto.new(transaction)
-
-    except Exception:
+async def create(data: CreateTransactionDto, user: UserModel) -> TransactionDto:
+    if data.delta <= 0:
         raise HTTPException(
-            status_code=404, detail="Неправильный формат данных"
+            status_code=403, detail="Принимаются только delta > 0!"
         )
 
-
-async def update_transaction(
-    data: TransactionChangeByIdDto,
-) -> TransactionOutDto:
-    """Изменение полей у транзакции, передаются id транзакции и словарь: ключ-значения"""
-    transaction = await TransactionModel.get_or_none(id=data.id)
-
-    if not transaction:
-        raise HTTPException(status_code=404, detail="Транзакция не найдена")
-
-    valid_fields = {
-        field
-        for field in TransactionModel._meta.fields_map.keys()
-        if field != "id"
-    }
-
-    # Проверка на существование полей в модельке
-    for field in data.updates.keys():
-        if field not in valid_fields:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Неверное поле: '{field}'. Допустимые поля: {valid_fields}",
-            )
-
-    for field, value in data.updates.items():
-        setattr(transaction, field, value)
-
-    await transaction.save()
-
-    return TransactionOutDto.new(transaction)
-
-
-async def get_transactions_for_user_id(
-    data: TransactionUserIdDto,
-) -> list[TransactionOutDto]:
-    """Получение транзакций относительно id пользователя"""
-    user = await UserModel.get_or_none(id=data.id)
-    if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
-
-    transactions = await TransactionModel.filter(user_id=data.id).all()
-    if not transactions:
+    category = await get_category(data.product_name)
+    if not category:
         raise HTTPException(
-            status_code=404,
-            detail=f"Нет транзакций с закрепленной id пользователем: {data.id}",
+            status_code=403, detail=f"Не удалось получить данные о категории!"
         )
 
-    return [TransactionOutDto.new(transaction) for transaction in transactions]
+    delta = data.delta * (1 if category.is_deposit else -1)
+    new_balance = user.balance + delta
 
+    if new_balance < 0:
+        raise HTTPException(
+            status_code=403, detail="На балансе недостаточно средств!"
+        )
 
-async def get_all() -> list[TransactionOutDto]:
-    """Получение всех транзакций"""
-    transactions = await TransactionModel.all()
+    user.balance = new_balance
+    await user.save()
 
-    return [TransactionOutDto.new(transaction) for transaction in transactions]
+    transaction = await TransactionModel.create(
+        product_name=data.product_name,
+        balance=new_balance,
+        delta=delta,
+        user_id=user.id,
+        category_id=category.id,
+    )
 
-
-async def delete_transaction(data: TransactionIdDto) -> None:
-    transaction = await TransactionModel.get_or_none(id=data.id)
-
-    if not transaction:
-        raise HTTPException(status_code=404, detail="Транзакция не найдена")
-
-    await transaction.delete()
+    return TransactionDto.new(transaction, category.name)
