@@ -1,7 +1,7 @@
 from app.schemas.user import (
     CreateUserDto,
     UserDto,
-    UserWithEmailDto,
+    VerboseUserDto,
     UserTokensDto,
 )
 
@@ -12,7 +12,7 @@ from fastapi import APIRouter, Path, Depends
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.post("", response_model=UserWithEmailDto)
+@router.post("", response_model=VerboseUserDto)
 async def register(user: CreateUserDto):
     """Регистрация нового пользователя"""
     return await user_controller.create_user(user)
@@ -26,7 +26,7 @@ async def login(input: OAuth2PasswordRequestForm = Depends()):
     )
 
     return UserTokensDto(
-        user_data=UserWithEmailDto.new(user),
+        user_data=VerboseUserDto.new(user),
         access_token=access,
         refresh_token=refresh,
     )
@@ -56,7 +56,7 @@ async def get_user(user_id: int = Path(..., gt=0)):
     return await user_controller.get_user_by_id(user_id)
 
 
-@router.get("/{user_id}/full", response_model=UserWithEmailDto)
+@router.get("/{user_id}/full", response_model=VerboseUserDto)
 async def get_user_with_email(
     user_id: int = Path(..., gt=0), user=Depends(user_controller.auth.get_user)
 ):

@@ -29,12 +29,12 @@ class UserDto(BaseModel):
         )
 
 
-class UserWithEmailDto(UserDto):
+class VerboseUserDto(UserDto):
     email: str
 
     @staticmethod
     def new(user: UserModel):
-        return UserWithEmailDto(
+        return VerboseUserDto(
             id=user.id,
             email=user.email,
             first_name=user.first_name,
@@ -44,6 +44,6 @@ class UserWithEmailDto(UserDto):
 
 
 class UserTokensDto(BaseModel):
-    user_data: UserWithEmailDto
+    user_data: VerboseUserDto
     access_token: str
     refresh_token: str

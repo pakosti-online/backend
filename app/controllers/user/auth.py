@@ -1,6 +1,6 @@
 from jose.exceptions import ExpiredSignatureError
 from fastapi.security import OAuth2PasswordBearer
-from app.schemas.user import UserWithEmailDto
+from app.schemas.user import VerboseUserDto
 from tortoise.exceptions import DoesNotExist
 from fastapi import Depends, HTTPException
 from datetime import datetime, timedelta
@@ -20,7 +20,7 @@ def create_token(
 ) -> str:
     exp = datetime.now() + lifetime
     data = {
-        "user": UserWithEmailDto(
+        "user": VerboseUserDto(
             id=user.id,
             first_name=user.first_name,
             last_name=user.last_name,

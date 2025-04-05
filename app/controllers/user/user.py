@@ -1,11 +1,11 @@
 from .auth import create_refresh_token, create_access_token, verify_token
-from app.schemas.user import CreateUserDto, UserWithEmailDto, UserDto
+from app.schemas.user import CreateUserDto, VerboseUserDto, UserDto
 from app.models.user import UserModel
 from fastapi import HTTPException
 from passlib.hash import bcrypt
 
 
-async def create_user(dto: CreateUserDto) -> UserWithEmailDto:
+async def create_user(dto: CreateUserDto) -> VerboseUserDto:
     existing = await UserModel.get_or_none(email=dto.email)
     if existing:
         raise HTTPException(
@@ -21,7 +21,7 @@ async def create_user(dto: CreateUserDto) -> UserWithEmailDto:
         patronymic=dto.patronymic or "",
     )
 
-    return UserWithEmailDto.new(user)
+    return VerboseUserDto.new(user)
 
 
 async def get_users() -> list[UserDto]:
@@ -43,11 +43,11 @@ async def get_user_by_id(user_id: int) -> UserDto:
     return UserDto.new(user)
 
 
-async def get_user_with_email(user_id: int) -> UserWithEmailDto:
+async def get_user_with_email(user_id: int) -> VerboseUserDto:
     user = await UserModel.get_or_none(id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    return UserWithEmailDto.new(user)
+    return VerboseUserDto.new(user)
 
 
 async def login(email: str, password: str):
