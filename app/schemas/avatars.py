@@ -1,9 +1,5 @@
-from pydantic import BaseModel, StringConstraints, condecimal
-from typing import Annotated, Optional, Dict, Union
-from datetime import datetime
-
-
-from app.models.user import UserModel, Avatar
+from pydantic import BaseModel
+from app.models.user import AvatarModel
 
 
 class UserAvatarInDto(BaseModel):
@@ -15,7 +11,7 @@ class UserAvatarOutDto(BaseModel):
     file_path: str
 
     @staticmethod
-    def new(data: Avatar):
+    def new(data: AvatarModel):
         return UserAvatarOutDto(
             id=data.id,
             file_path=data.file_path,

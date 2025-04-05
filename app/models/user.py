@@ -3,7 +3,7 @@ from passlib.hash import bcrypt
 from tortoise import fields
 
 
-class Avatar(Model):
+class AvatarModel(Model):
     id = fields.IntField(pk=True)
     file_path = fields.CharField(
         max_length=255, null=True, default=None
@@ -25,8 +25,8 @@ class UserModel(Model):
     balance = fields.DecimalField(max_digits=20, decimal_places=2, default=0.00)
 
     avatar = fields.ForeignKeyField(
-        "models.Avatar",
-        related_name="user_avatar",
+        "models.AvatarModel",
+        related_name="users",
         null=True,
         on_delete=fields.SET_NULL,
     )

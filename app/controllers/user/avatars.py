@@ -6,12 +6,11 @@ import os
 import io
 
 from .utils import validate_image_file
-from app.models.user import UserModel, Avatar
+from app.models.user import UserModel, AvatarModel
 from .auth import get_user
 from app.schemas.avatars import UserAvatarOutDto, UserAvatarInDto
 
 
-# @router_for_avatar.post("/app/api/create-avatar")
 async def create_avatar_for_user(
     file: UploadFile, current_user: UserModel = Depends(get_user)
 ) -> UserAvatarOutDto:
@@ -72,7 +71,7 @@ async def create_avatar_for_user(
                 detail=f"Ошибка удаления старой аватарки: {str(e)}",
             )
 
-    avatar = await Avatar.create(file_path=file_path)
+    avatar = await AvatarModel.create(file_path=file_path)
 
     # Обновляем аватарку пользователя
     user.avatar_id = avatar.id
@@ -82,7 +81,7 @@ async def create_avatar_for_user(
 
 
 async def delete_avatar(data: UserAvatarInDto) -> None:
-    avatar = await Avatar.get_or_none(id=data.id)
+    avatar = await AvatarModel.get_or_none(id=data.id)
     if not avatar:
         raise HTTPException(status_code=404, detail="Аватарка не найдена")
 
@@ -107,7 +106,7 @@ async def delete_avatar(data: UserAvatarInDto) -> None:
 
 
 async def create_url_for_file(data: UserAvatarInDto) -> FileResponse:
-    avatar = await Avatar.get_or_none(id=data.id)
+    avatar = await AvatarModel.get_or_none(id=data.id)
     if not avatar:
         raise HTTPException(status_code=404, detail="Аватарка не найдена")
 

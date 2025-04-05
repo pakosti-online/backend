@@ -9,7 +9,9 @@ from app.schemas.avatars import UserAvatarOutDto, UserAvatarInDto
 
 from fastapi.security import OAuth2PasswordRequestForm
 import app.controllers.user as user_controller
+import app.controllers.user.avatars as user_avatar_controller
 from fastapi import APIRouter, Path, Depends, UploadFile
+from fastapi.responses import FileResponse
 
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -22,7 +24,7 @@ async def register(user: CreateUserDto):
 
 
 @router.post("/login", response_model=UserTokensDto)
-async def login(input: OAuth2PasswordRequestForm = Depends()):
+async def login(input: OAuth2PasswordRequestForm = Depends()):  # !!!
     """Вход пользователя. Генерирует Access/Refresh токены"""
     user, access, refresh = await user_controller.login(
         input.username, input.password
@@ -73,4 +75,18 @@ async def create_avatar_for_user(
     file: UploadFile, user=Depends(user_controller.auth.get_user)
 ):
     """Создание аватарки для пользователя, если такая есть то предыдущая удаляется"""
-    return await user_controller.avatars.create_avatar_for_user(file, user)
+    return await user_avatar_controller.create_avatar_for_user(file, user)
+
+
+@router.delete("/avatar", status_code=204)
+async def delete_avatar(id: int):
+    """Удаление аватарки"""
+    await user_avatar_controller.delete_avatar(UserAvatarInDto(id=id))
+
+
+@router.get("/avatar-url/{id}", response_class=FileResponse)
+async def create_url(id: int):
+    """Создание ссылки на аватарку через эндпоинт (опционально)"""
+    return await user_avatar_controller.create_url_for_file(
+        UserAvatarInDto(id=id)
+    )
