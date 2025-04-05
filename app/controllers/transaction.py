@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.models.transaction import TransactionModel
+from app.models.transaction import TransactionModel, TransactionCategoryModel
 from app.models.user import UserModel
 from app.schemas.transaction import (
     CreateTransactionDto,
@@ -41,3 +41,55 @@ async def create(data: CreateTransactionDto, user: UserModel) -> TransactionDto:
     )
 
     return TransactionDto.new(transaction, category.name)
+
+
+async def edit_category(
+    user: UserModel, transaction_id: int, category_name: str
+):
+    transaction = await TransactionModel.get_or_none(id=transaction_id)
+
+    if not transaction:
+        raise HTTPException(
+            status_code=404, detail="Транзакции с данным ID не существует!"
+        )
+
+    if transaction.user_id != user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Вы не имеете права взаимодействовать с данной транзакцией!",
+        )
+
+    current_category = await TransactionCategoryModel.get(
+        id=transaction.category_id
+    )
+
+    if current_category.is_deposit:
+        raise HTTPException(
+            status_code=403,
+            detail="Вы не можете менять категорию у приходящей транзакции!",
+        )
+    elif new_category.is_deposit:
+        raise HTTPException(
+            status_code=403,
+            detail="Вы не можете менять категорию на приходящую!",
+        )
+
+    new_category = await TransactionCategoryModel.get_or_none(
+        name=category_name
+    )
+
+    if not new_category:
+        raise HTTPException(
+            status_code=404, detail="Данной категории не существует!"
+        )
+
+    transaction.category_id = new_category.id
+    await transaction.save()
+
+
+async def get_transactions_by_user(user_id: int) -> list[TransactionDto]:
+    transactions = await TransactionModel.filter(user_id=user_id)
+    return [
+        TransactionDto.new(transaction, (await transaction.category).name)
+        for transaction in transactions
+    ]

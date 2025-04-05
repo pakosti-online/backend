@@ -12,6 +12,11 @@ class CreateTransactionDto(BaseModel):
     delta: Optional[condecimal(max_digits=20, decimal_places=2)] = None
 
 
+class EditTransactionDto(BaseModel):
+    id: int
+    category_name: str
+
+
 class TransactionDto(BaseModel):
     id: int
     product_name: str
