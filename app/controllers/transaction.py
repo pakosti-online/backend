@@ -67,16 +67,11 @@ async def edit_category(
     current_category = await TransactionCategoryModel.get(
         id=transaction.category_id
     )
-
+    
     if current_category.is_deposit:
         raise HTTPException(
             status_code=403,
             detail="Вы не можете менять категорию у приходящей транзакции!",
-        )
-    elif new_category.is_deposit:
-        raise HTTPException(
-            status_code=403,
-            detail="Вы не можете менять категорию на приходящую!",
         )
 
     new_category = await TransactionCategoryModel.get_or_none(
@@ -87,6 +82,13 @@ async def edit_category(
         raise HTTPException(
             status_code=404, detail="Данной категории не существует!"
         )
+        
+    if new_category.is_deposit:
+        raise HTTPException(
+            status_code=403,
+            detail="Вы не можете менять категорию на приходящую!",
+        )
+
 
     await TransactionModelEdit.create(
         product_name=transaction.product_name,
