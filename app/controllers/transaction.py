@@ -1,4 +1,4 @@
-from app.models.transaction import TransactionModel, TransactionCategoryModel
+from app.models.transaction import TransactionModel, TransactionCategoryModel, TransactionModelEdit
 import app.controllers.categories as category_controller
 import app.controllers.websocket.events as events
 from app.models.user import UserModel
@@ -71,7 +71,7 @@ async def edit_category(
     current_category = await TransactionCategoryModel.get(
         id=transaction.category_id
     )
-
+    
     if current_category.is_deposit:
         events.event_sending_mes(
             "Вы не можете менять категорию у приходящей транзакции!", user
@@ -79,14 +79,6 @@ async def edit_category(
         raise HTTPException(
             status_code=403,
             detail="Вы не можете менять категорию у приходящей транзакции!",
-        )
-    elif new_category.is_deposit:
-        events.event_sending_mes(
-            "Вы не можете менять категорию на приходящую транзакцию!", user
-        )
-        raise HTTPException(
-            status_code=403,
-            detail="Вы не можете менять категорию на приходящую!",
         )
 
     new_category = await TransactionCategoryModel.get_or_none(
@@ -98,7 +90,20 @@ async def edit_category(
         raise HTTPException(
             status_code=404, detail="Данной категории не существует!"
         )
+        
+    if new_category.is_deposit:
+        raise HTTPException(
+            status_code=403,
+            detail="Вы не можете менять категорию на приходящую!",
+        )
 
+
+    await TransactionModelEdit.create(
+        product_name=transaction.product_name,
+        user_id=user.id,
+        category_id=new_category.id,
+    )
+    
     transaction.category_id = new_category.id
     events.event_sending_mes("Успешно сохранена транзакция!", user)
     await transaction.save()
