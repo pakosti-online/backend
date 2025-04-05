@@ -20,6 +20,6 @@ def init_db(app: FastAPI) -> None:
         app,
         config=TORTOISE_ORM,
         modules={"models": ["app.models.user", "app.models.transaction"]},
-        generate_schemas=False,
+        generate_schemas=True,
         add_exception_handlers=True,
     )
