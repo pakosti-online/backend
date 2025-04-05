@@ -7,6 +7,7 @@ from app.schemas.transaction import (
 import app.controllers.transaction as transaction_controller
 import app.controllers.user as user_controller
 import app.controllers.categories as category_controller
+import app.controllers.ml as ml_controller
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
 
@@ -38,3 +39,11 @@ async def get_by_user(user=Depends(user_controller.auth.get_user)):
 async def get_all_categories():
     """Получение всех категорий"""
     return await category_controller.get_all_categories()
+
+
+@router.get("/recommendations")
+async def get_recommendations(user=Depends(user_controller.auth.get_user)):
+    transactions = await transaction_controller.get_transactions_by_user(
+        user.id
+    )
+    return await ml_controller.get_recommendations(transactions)

@@ -1,8 +1,7 @@
-from pydantic import BaseModel, StringConstraints, condecimal
-from typing import Annotated, Optional, Dict, Union
-from datetime import datetime
-
+from pydantic import BaseModel, StringConstraints, condecimal, PlainSerializer
 from app.models.transaction import TransactionModel, TransactionCategoryModel
+from typing import Annotated, Optional
+from datetime import datetime
 
 
 class CreateTransactionDto(BaseModel):
@@ -17,10 +16,19 @@ class EditTransactionDto(BaseModel):
     category_name: str
 
 
+SerializableDatetime = Annotated[
+    datetime,
+    PlainSerializer(
+        lambda _datetime: _datetime.strftime("%m/%d/%Y, %H:%M:%S"),
+        return_type=str,
+    ),
+]
+
+
 class TransactionDto(BaseModel):
     id: int
     product_name: str
-    date_created: datetime
+    date_created: SerializableDatetime
     category: str
     balance: float
     delta: float
