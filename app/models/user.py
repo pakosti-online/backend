@@ -5,13 +5,12 @@ from tortoise.models import Model
 
 class UserModel(Model):
     id = fields.IntField(pk=True)
-    name = fields.CharField(null=False, max_length=40)
-    surname = fields.CharField(null=False, max_length=40)
-    patronymic = fields.CharField(null=False, max_length=40)
-    login = fields.CharField(null=False, max_length=40, unique=True)
-    password = fields.CharField(max_length=60)
-    name = fields.CharField(null=False, max_length=40)
-    role = fields.CharField(max_length=20, default="client")  # admin, client
+    email = fields.CharField(null=False, max_length=60, unique=True)
+    password_hash = fields.CharField(max_length=128)
+
+    first_name = fields.CharField(max_length=30)
+    last_name = fields.CharField(max_length=30)
+    patronymic = fields.CharField(max_length=30)
 
     def verify_password(self, password):
         return bcrypt.verify(password, self.password)
