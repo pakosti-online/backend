@@ -45,12 +45,6 @@ async def list_users():
     return await user_controller.get_users()
 
 
-@router.delete("/{user_id}", status_code=204)
-async def delete_user(user_id: int = Path(..., gt=0)):
-    """Удаление пользователя по ID"""
-    await user_controller.delete_user(user_id)
-
-
 @router.get("/public/{user_id}", response_model=UserDto)
 async def get_user(user_id: int = Path(..., gt=0)):
     """Возвращает публичную информацию о пользователе с данным user_id"""
