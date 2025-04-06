@@ -87,7 +87,7 @@ async def delete_avatar(user=Depends(user_controller.auth.get_user)):
         )
     except Exception:
         raise HTTPException(
-            status_code=404, detail="У пользователя нет аватарки"
+            status_code=403, detail="У пользователя нет аватарки!"
         )
 
 
