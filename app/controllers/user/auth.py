@@ -29,7 +29,7 @@ def create_token(
 
 
 def create_access_token(user: UserModel):
-    return create_token(user, timedelta(minutes=15), "access")
+    return create_token(user, timedelta(hours=2), "access")
 
 
 def create_refresh_token(user: UserModel):
