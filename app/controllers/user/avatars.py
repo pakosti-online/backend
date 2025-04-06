@@ -20,7 +20,6 @@ async def create_avatar_for_user(
             status_code=404, detail="Разрешены только файлы JPG и PNG"
         )
 
-    # Проверка, существует ли задача
     user = await UserModel.get_or_none(id=current_user.id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -31,7 +30,6 @@ async def create_avatar_for_user(
             status_code=404, detail="Неверный формат изображения"
         )
 
-    # Открываем изображение с помощью Pillow
     try:
         image = Image.open(io.BytesIO(file_bytes))
     except Exception as e:
@@ -41,16 +39,12 @@ async def create_avatar_for_user(
 
     resampling_filter = Image.Resampling.LANCZOS
 
-    # Сжимаем изображение до 256x256
-    image = image.convert(
-        "RGB"
-    )  # Приводим изображение к RGB (на случай PNG с альфа-каналом)
+    # Сжимание изображения до 256x256
+    image = image.convert("RGB")
     image = image.resize((256, 256), resampling_filter)
 
-    # Генерируем уникальное имя файла с сохранением расширения
-    unique_filename = f"{uuid.uuid4()}.jpg"  # Сохраняем как JPEG
+    unique_filename = f"{uuid.uuid4()}.jpg"
     file_path = os.path.join("/backend/uploads/photoes", unique_filename)
-    # Сохраняем сжатое изображение на диск
     try:
         image.save(file_path, "JPEG")
     except Exception as e:
@@ -59,7 +53,6 @@ async def create_avatar_for_user(
             detail=f"Ошибка сохранения сжатого изображения: {str(e)}",
         )
 
-    # Удаляем старую аватарку, если она есть
     if user.avatar:
         try:
             old_avatar = await user.avatar
@@ -73,7 +66,6 @@ async def create_avatar_for_user(
 
     avatar = await AvatarModel.create(file_path=file_path)
 
-    # Обновляем аватарку пользователя
     user.avatar_id = avatar.id
     await user.save(update_fields=["avatar_id"])
 
