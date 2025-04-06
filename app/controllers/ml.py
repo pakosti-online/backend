@@ -3,6 +3,7 @@ from app.schemas.transaction import TransactionDto
 from os import environ
 import httpx
 import json
+from datetime import datetime
 
 PREDICTOR_CATEGORIZER_URL = environ.get(
     "EXTERNAL_PREDICTOR_CATEGORIZER_URL", "http://localhost:3000/"
@@ -47,10 +48,16 @@ async def get_recommendations(transactions: list[TransactionDto]):
         return json.loads(response.text)
 
 async def get_forecast(transactions: list[TransactionDto], day_predict: int):
-    loadable_transactions = [
-        transaction.model_dump() for transaction in transactions
-    ]
+    def format_datetime(dt: datetime) -> str:
+        return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    loadable_transactions = []
+    for transaction in transactions:
+        item = transaction.model_dump()
+        item["date_created"] = format_datetime(transaction.date_created)
+        loadable_transactions.append(item)
+
     data = {"data": loadable_transactions, "days": day_predict}
+    print(data)
     async with httpx.AsyncClient() as client:
         response = await client.post(
             PREDICTOR_FORECAST_URL, json=data
@@ -61,4 +68,4 @@ async def get_forecast(transactions: list[TransactionDto], day_predict: int):
                 status_code=403,
                 detail="Произошла ошибка при попытке получить предсказание баланса!",
             )
-        return int(response.text)
+        return float(response.text)
