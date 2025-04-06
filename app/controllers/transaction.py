@@ -3,9 +3,12 @@ import app.controllers.categories as category_controller
 import app.controllers.websocket.events as events
 from app.models.user import UserModel
 from fastapi import HTTPException
+from typing import Optional
+from datetime import datetime
 from app.schemas.transaction import (
     CreateTransactionDto,
     TransactionDto,
+    TransactionCategoryFilterDto
 )
 
 
@@ -100,8 +103,17 @@ async def edit_category(
     await transaction.save()
 
 
-async def get_transactions_by_user(user_id: int) -> list[TransactionDto]:
-    transactions = await TransactionModel.filter(user_id=user_id)
+async def get_transactions_by_user(user_id: int, start_at: Optional[str] = None, end_at: Optional[str] = None) -> list[TransactionDto]:
+    query = TransactionModel.filter(user_id=user_id)
+    if start_at:
+        start_at = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
+        query = query.filter(date_created__gte=start_at)
+    if end_at:
+        end_at = datetime.fromisoformat(end_at.replace("Z", "+00:00"))
+        query = query.filter(date_created__lte=end_at)
+
+    transactions = await query
+        
     return [
         TransactionDto.new(transaction, (await transaction.category).name)
         for transaction in transactions
