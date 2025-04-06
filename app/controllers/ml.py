@@ -53,7 +53,7 @@ async def get_forecast(transactions: list[TransactionDto], day_predict: int):
     data = {"data": loadable_transactions, "days": day_predict}
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            PREDICTOR_RECOMMENDATION_URL, json=data
+            PREDICTOR_FORECAST_URL, json=data
         )
 
         if response.status_code != 200:
