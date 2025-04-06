@@ -59,3 +59,7 @@ class TransactionCategoryOutDto(BaseModel):
             name=data.name,
             is_deposit=data.is_deposit,
         )
+
+class TransactionCategoryFilterDto(BaseModel):
+    start_at: Optional[SerializableDatetime] = None
+    end_at: Optional[SerializableDatetime] = None

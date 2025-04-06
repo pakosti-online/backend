@@ -3,6 +3,7 @@ from app.schemas.transaction import (
     CreateTransactionDto,
     EditTransactionDto,
     TransactionCategoryOutDto,
+    TransactionCategoryFilterDto
 )
 import app.controllers.transaction as transaction_controller
 import app.controllers.user as user_controller
@@ -31,8 +32,8 @@ async def edit_category(
 
 
 @router.get("")
-async def get_by_user(user=Depends(user_controller.auth.get_user)):
-    return await transaction_controller.get_transactions_by_user(user.id)
+async def get_by_user(start_at: str = None, end_at: str = None, user=Depends(user_controller.auth.get_user)):
+    return await transaction_controller.get_transactions_by_user(user.id, start_at, end_at)
 
 
 @router.get("/categories", response_model=list[TransactionCategoryOutDto])
