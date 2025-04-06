@@ -1,4 +1,9 @@
-from app.models.transaction import TransactionModel, TransactionCategoryModel, TransactionModelEdit
+from app.models.transaction import (
+    TransactionModel,
+    TransactionCategoryModel,
+    TransactionModelEdit,
+)
+import app.controllers.analytics.common_analytics as analytics_controller
 import app.controllers.categories as category_controller
 import app.controllers.websocket.events as events
 from app.models.user import UserModel
@@ -11,14 +16,14 @@ from app.schemas.transaction import (
 
 async def create(data: CreateTransactionDto, user: UserModel) -> TransactionDto:
     if data.delta <= 0:
-        events.event_sending_mes("Принимаются только delta > 0!", user)
+        await events.event_sending_mes("Принимаются только delta > 0!", user)
         raise HTTPException(
             status_code=403, detail="Принимаются только delta > 0!"
         )
 
     category = await category_controller.get_by_product_name(data.product_name)
     if not category:
-        events.event_sending_mes(
+        await events.event_sending_mes(
             "Не удалось получить данные о категории!", user
         )
         raise HTTPException(
@@ -29,7 +34,7 @@ async def create(data: CreateTransactionDto, user: UserModel) -> TransactionDto:
     new_balance = user.balance + delta
 
     if new_balance < 0:
-        events.event_sending_mes("На балансе недостаточно средств!", user)
+        await events.event_sending_mes("На балансе недостаточно средств!", user)
         raise HTTPException(
             status_code=403, detail="На балансе недостаточно средств!"
         )
@@ -44,7 +49,8 @@ async def create(data: CreateTransactionDto, user: UserModel) -> TransactionDto:
         user_id=user.id,
         category_id=category.id,
     )
-    events.event_sending_mes("Успешно создана транзакция!", user)
+    await events.event_sending_mes("Успешно создана транзакция!", user)
+    await analytics_controller.send_analytics_update(user)
     return TransactionDto.new(transaction, category.name)
 
 
@@ -54,13 +60,13 @@ async def edit_category(
     transaction = await TransactionModel.get_or_none(id=transaction_id)
 
     if not transaction:
-        events.event_sending_mes("Несуществующая транзакция!", user)
+        await events.event_sending_mes("Несуществующая транзакция!", user)
         raise HTTPException(
             status_code=404, detail="Транзакции с данным ID не существует!"
         )
 
     if transaction.user_id != user.id:
-        events.event_sending_mes(
+        await events.event_sending_mes(
             "Вы не имеете права взаимодействовать с данной транзакцией!", user
         )
         raise HTTPException(
@@ -71,9 +77,9 @@ async def edit_category(
     current_category = await TransactionCategoryModel.get(
         id=transaction.category_id
     )
-    
+
     if current_category.is_deposit:
-        events.event_sending_mes(
+        await events.event_sending_mes(
             "Вы не можете менять категорию у приходящей транзакции!", user
         )
         raise HTTPException(
@@ -86,27 +92,28 @@ async def edit_category(
     )
 
     if not new_category:
-        events.event_sending_mes("Такой категории не существует!", user)
+        await events.event_sending_mes("Такой категории не существует!", user)
         raise HTTPException(
             status_code=404, detail="Данной категории не существует!"
         )
-        
+
     if new_category.is_deposit:
         raise HTTPException(
             status_code=403,
             detail="Вы не можете менять категорию на приходящую!",
         )
 
-
     await TransactionModelEdit.create(
         product_name=transaction.product_name,
         user_id=user.id,
         category_id=new_category.id,
     )
-    
+
     transaction.category_id = new_category.id
-    events.event_sending_mes("Успешно сохранена транзакция!", user)
     await transaction.save()
+
+    await events.event_sending_mes("Успешно сохранена транзакция!", user)
+    await analytics_controller.send_analytics_update(user)
 
 
 async def get_transactions_by_user(user_id: int) -> list[TransactionDto]:

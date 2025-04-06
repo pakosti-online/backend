@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union
 from datetime import datetime
+from app.schemas.analytics import ErrorNotification, AnalyticsNotification
 
 
 class NotificationDto(BaseModel):
@@ -24,3 +25,9 @@ class NotificationDto(BaseModel):
 
     class Config:
         json_encoders = {datetime: lambda v: v.isoformat()}
+
+
+# Объединенный тип для всех уведомлений
+WebSocketMessage = Union[
+    ErrorNotification, AnalyticsNotification, NotificationDto
+]
