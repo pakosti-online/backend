@@ -57,7 +57,6 @@ async def get_forecast(transactions: list[TransactionDto], day_predict: int):
         loadable_transactions.append(item)
 
     data = {"data": loadable_transactions, "days": day_predict}
-    print(data)
     async with httpx.AsyncClient() as client:
         response = await client.post(
             PREDICTOR_FORECAST_URL, json=data
