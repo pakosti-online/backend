@@ -3,8 +3,10 @@ from fastapi.security import HTTPBearer
 from app.schemas.analytics import AnalyticsResponse, AnalyticsResponses
 from app.models.user import UserModel
 
-import app.controllers.analytics.common_analytics as analytics_controller
-import app.controllers.analytics.comprative_analytics as comp_analytics_controller
+import app.controllers.analytics.common_analytics as com_analytics_controller
+import app.controllers.analytics.comparative_analytics as comp_analytics_controller
+import app.controllers.analytics.contrastive_analytics as cont_analytics_controller
+
 
 import app.controllers.user as user_controller
 
@@ -18,12 +20,18 @@ async def get_user_analytics(
     current_user: UserModel = Depends(user_controller.auth.get_user),
 ):
     """Эндпоинт по созданию простенькой аналитики данных относительно даты (кол-во дней) у нынешнего пользователя"""
-    return await analytics_controller.get_analytics(
+    return await com_analytics_controller.get_analytics(
         current_user.id, period_days
     )
 
 
-@router.get("/comprative", response_model=AnalyticsResponses)
+@router.get("/comparative", response_model=AnalyticsResponses)
 async def get_analytics(user=Depends(user_controller.get_user)):
     analytics = await comp_analytics_controller.get_user_analytics(user)
     return {"analytics": analytics}
+
+
+# @router.get("/contrastive")
+# async def get_analytic_by_expenses(user=Depends(user_controller.get_user)):
+#     analytics = await cont_analytics_controller.get_balance_structure_analytics(user)
+#     return analytics

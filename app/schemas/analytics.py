@@ -61,3 +61,17 @@ class CategoryAnalytics(BaseModel):
 
 class AnalyticsResponses(BaseModel):
     analytics: List[CategoryAnalytics]
+
+
+class BalanceStructureAnalytics(BaseModel):
+    balance: Decimal
+
+    mandatory_income: Decimal
+    non_mandatory_income: Decimal
+    mandatory_expense: Decimal
+    non_mandatory_expense: Decimal
+
+    mandatory_income_percent: float
+    non_mandatory_income_percent: float
+    mandatory_expense_percent: float
+    non_mandatory_expense_percent: float
