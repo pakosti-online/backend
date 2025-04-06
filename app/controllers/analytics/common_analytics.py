@@ -7,7 +7,9 @@ from app.controllers.websocket.events import event_sending_mes
 from app.models.user import UserModel
 from app.schemas.analytics import AnalyticsNotification
 from app.controllers.websocket.websocket import manager_con as manager
-
+from app.models.finances import FinancesEducate
+from app.schemas.finances import FinancesEducateDto
+from random import randint
 
 async def send_analytics_update(user: UserModel):
     try:
@@ -111,4 +113,33 @@ async def get_analytics(
         await event_sending_mes(
             f"Ошибка при получении аналитики: {str(e)}", user_id
         )
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def get_finances_educate() -> list[FinancesEducate]:
+    try:
+        finances_educate = await FinancesEducate.all()
+        if not finances_educate:
+            raise HTTPException(status_code=404, detail="No finances educate found")
+        return [
+            FinancesEducate(
+                id=finance.id,
+                title=finance.title,
+                description=finance.description,
+            )
+            for finance in finances_educate
+        ]
+    except Exception as e:
+    
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    
+async def get_random_finances_ed() -> FinancesEducateDto:
+    try:
+        finances = await FinancesEducate.all()
+        list_finances = [FinancesEducateDto.new(finance) for finance in finances]
+        if not finances:
+            raise HTTPException(status_code=404, detail="No finances educate found")
+        return list_finances[randint(0, len(list_finances) - 1)]
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
