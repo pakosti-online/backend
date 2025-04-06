@@ -5,7 +5,6 @@ from app.models.user import UserModel
 
 import app.controllers.analytics.common_analytics as com_analytics_controller
 import app.controllers.analytics.comparative_analytics as comp_analytics_controller
-import app.controllers.analytics.contrastive_analytics as cont_analytics_controller
 
 
 import app.controllers.user as user_controller
@@ -29,9 +28,3 @@ async def get_user_analytics(
 async def get_analytics(user=Depends(user_controller.get_user)):
     analytics = await comp_analytics_controller.get_user_analytics(user)
     return {"analytics": analytics}
-
-
-# @router.get("/contrastive")
-# async def get_analytic_by_expenses(user=Depends(user_controller.get_user)):
-#     analytics = await cont_analytics_controller.get_balance_structure_analytics(user)
-#     return analytics
